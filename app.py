@@ -2,6 +2,7 @@ import streamlit as st
 import json
 import traceback
 import pandas as pd
+import asyncio
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SequentialChain
@@ -15,8 +16,12 @@ uploaded_file = st.file_uploader("Upload your PDF or TXT file", type=["pdf", "tx
 number_of_mcqs = st.number_input("Number of MCQs", min_value=1, max_value=50, value=5)
 subject = st.text_input("Subject", value="General Knowledge")
 tone = st.selectbox("Tone of the MCQs", ["Formal", "Casual", "Fun", "Challenging"])
+generate_button = st.button("Generate Quiz")
 
-def generate_quiz(text, number, subject, tone, api_key):
+# --------------------------
+# Async function for quiz
+# --------------------------
+async def generate_quiz_async(text, number, subject, tone, api_key):
     # Initialize LLM
     llm = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
@@ -75,18 +80,23 @@ Check from an expert English Writer of the above quiz:
         verbose=False
     )
 
-    result = overall_chain({
-        "text": text,
-        "number": number,
-        "subject": subject,
-        "tone": tone,
-        "response_json": response_json_template
-    })
-
+    # Run the chain asynchronously
+    result = await asyncio.to_thread(
+        overall_chain.run,
+        {
+            "text": text,
+            "number": number,
+            "subject": subject,
+            "tone": tone,
+            "response_json": response_json_template
+        }
+    )
     return result
 
-# Button click logic
-if st.button("Generate Quiz"):
+# --------------------------
+# Streamlit button click
+# --------------------------
+if generate_button:
     if not api_key.strip():
         st.error("Please enter your Google Gemini API key.")
     elif not uploaded_file:
@@ -95,7 +105,8 @@ if st.button("Generate Quiz"):
         with st.spinner("Generating quiz... This may take a moment."):
             try:
                 text = read_file(uploaded_file)
-                result = generate_quiz(text, number_of_mcqs, subject, tone, api_key)
+                # Run async function
+                result = asyncio.run(generate_quiz_async(text, number_of_mcqs, subject, tone, api_key))
 
                 st.success("Quiz Generated!")
                 parsed_quiz = safe_json_parse(result["quiz"])
