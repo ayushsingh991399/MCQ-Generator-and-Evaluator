@@ -22,7 +22,7 @@ generate_button = st.button("Generate Quiz")
 
 
 if generate_button:
-    if not api_key:
+    if not google_api_key:
         st.error("Please enter your Google Gemini API key.")
     elif not uploaded_file:
         st.error("Please upload a PDF or TXT file.")
