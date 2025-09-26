@@ -11,7 +11,7 @@ from langchain.chains import LLMChain, SequentialChain
 
 
 st.title("MCQ Generator and Evaluator")
-google_api_key = st.text_input("Enter your Google Gemini API Key", type="password")
+api_key = st.text_input("Enter your Google Gemini API Key", type="password")
 st.markdown("Upload a document, provide some details, and let the Gemini model create a quiz for you.")
 uploaded_file = st.file_uploader("Upload your PDF or TXT file", type=["pdf", "txt"])
 number_of_mcqs = st.number_input("Number of MCQs", min_value=1, max_value=50, value=5)
@@ -128,6 +128,7 @@ Check from an expert English Writer of the above quiz:
             except Exception as e:
                 st.error("Error generating quiz:")
                 st.text(traceback.format_exc())
+
 
 
 
