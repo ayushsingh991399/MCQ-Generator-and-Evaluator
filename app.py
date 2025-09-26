@@ -31,7 +31,7 @@ if generate_button:
             try:
                 text = read_file(uploaded_file)
 
-                llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.7, api_key=api_key)
+                llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.7,google_api_key=api_key)
 
                 # Response template for the quiz
                 response_json_template = json.dumps({
