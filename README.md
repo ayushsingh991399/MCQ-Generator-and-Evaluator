@@ -97,10 +97,6 @@ You need a **Google Gemini API key** to run this project.
 
 ---
 
-## 📸 Demo (Screenshots)
-> *(Add screenshots here when running the app for better presentation.)*  
-
----
 
 ## 📜 License
 This project is licensed under the **MIT License**.  
