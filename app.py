@@ -1,12 +1,12 @@
 import streamlit as st
-from langchain_google_genai import ChatGoogleGenerativeAI
 import json
 import traceback
 import pandas as pd
 import PyPDF2
-from utility import read_file, safe_json_parse, get_table_data
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SequentialChain
+from utility import read_file, safe_json_parse, get_table_data
 
 st.title("MCQ Generator and Evaluator")
 
@@ -21,9 +21,9 @@ tone = st.selectbox("Tone of the MCQs", ["Formal", "Casual", "Fun", "Challenging
 
 generate_button = st.button("Generate Quiz")
 
-# 2️⃣ Generate quiz only if button clicked
+# 2️⃣ Generate quiz only if button clicked and key exists
 if generate_button:
-    if not api_key.strip():  # Ensure API key is not empty
+    if not api_key.strip():
         st.error("Please enter your Google Gemini API key.")
     elif not uploaded_file:
         st.error("Please upload a PDF or TXT file.")
@@ -33,14 +33,14 @@ if generate_button:
                 # Read uploaded file
                 text = read_file(uploaded_file)
 
-                # ✅ Initialize LLM only here, after valid key is entered
+                # ✅ Initialize LLM only here
                 llm = ChatGoogleGenerativeAI(
                     model="gemini-2.5-flash",
                     temperature=0.7,
                     google_api_key=api_key.strip()
                 )
 
-                # 3️⃣ Prepare quiz template
+                # --- Prepare quiz template ---
                 response_json_template = json.dumps({
                     "q1": {
                         "mcq": "Question text",
@@ -68,7 +68,7 @@ Rules:
                 )
                 quiz_chain = LLMChain(llm=llm, prompt=quiz_prompt, output_key="quiz", verbose=False)
 
-                # 4️⃣ Prepare review template
+                # --- Prepare review template ---
                 review_template = """
 You are an expert English grammarian and writer. Given a Multiple Choice Quiz for {subject} students.
 You need to evaluate the complexity of the question and give a complete analysis of the quiz. Only use at max 50 words for complexity analysis. 
@@ -83,7 +83,7 @@ Check from an expert English Writer of the above quiz:
                 review_prompt = PromptTemplate(input_variables=["subject", "quiz"], template=review_template)
                 review_chain = LLMChain(llm=llm, prompt=review_prompt, output_key="review", verbose=False)
 
-                # 5️⃣ Combine chains
+                # --- Combine chains ---
                 overall_chain = SequentialChain(
                     chains=[quiz_chain, review_chain],
                     input_variables=["text", "number", "subject", "tone", "response_json"],
@@ -115,13 +115,13 @@ Check from an expert English Writer of the above quiz:
                         # Download buttons
                         json_str = json.dumps(parsed_quiz, indent=2)
                         st.download_button(
-                            "Download Quiz as JSON", data=json_str, 
+                            "Download Quiz as JSON", data=json_str,
                             file_name=f"{subject}_quiz.json", mime="application/json"
                         )
 
                         csv_data = df.to_csv(index=False)
                         st.download_button(
-                            "Download Quiz as CSV", data=csv_data, 
+                            "Download Quiz as CSV", data=csv_data,
                             file_name=f"{subject}_quiz.csv", mime="text/csv"
                         )
                     else:
