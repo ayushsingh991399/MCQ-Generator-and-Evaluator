@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import json
 import traceback
@@ -9,7 +10,7 @@ from langchain.chains import LLMChain, SequentialChain
 from utility import read_file, safe_json_parse, get_table_data
 
 st.title("MCQ Generator and Evaluator")
-
+os.en
 # User inputs
 api_key = st.text_input("Enter your Google Gemini API Key", type="password")
 uploaded_file = st.file_uploader("Upload your PDF or TXT file", type=["pdf", "txt"])
